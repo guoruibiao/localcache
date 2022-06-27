@@ -1,0 +1,7 @@
+name="LOCAL_CACHE"
+max_slots=10
+# byte
+max_memory=1024
+
+cache_strategy="default"
+clean_interval=1
