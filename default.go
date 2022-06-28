@@ -22,19 +22,12 @@ type Default struct {
 	bucket map[string]localValue
 }
 
-type localValue struct {
-	value *bytes.Buffer
-	ttl time.Time
-}
+
 
 var cachePool = sync.Pool{
 	New: func() interface{}{
 		return &bytes.Buffer{}
 	},
-}
-
-func (lv *localValue) isExpired() bool {
-	return !lv.ttl.IsZero() && time.Now().Unix() > lv.ttl.Unix()
 }
 
 func NewDefaultLocalCache(maxSlots, maxMemory, interval int) Cache {

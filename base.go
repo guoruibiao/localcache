@@ -1,6 +1,7 @@
 package localcache
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"os"
@@ -30,6 +31,17 @@ type Configuration struct {
 }
 
 
+type localValue struct {
+	keyname string // just for lru-cache
+	value *bytes.Buffer
+	ttl time.Time
+}
+
+func (lv *localValue) isExpired() bool {
+	return !lv.ttl.IsZero() && time.Now().Unix() > lv.ttl.Unix()
+}
+
+
 func Init(configPath string) error {
 	if _, err := os.Stat(configPath); err != nil {
 		panic(err)
@@ -44,7 +56,7 @@ func Init(configPath string) error {
 	// 从配置文件中选择要使用的 类型
 	switch config.CacheStrategy {
 	case LocalCacheTypeLRU:
-		Cacher = NewDefaultLocalCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
+		Cacher = NewLRUCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	default:
 		Cacher = NewDefaultLocalCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	}
