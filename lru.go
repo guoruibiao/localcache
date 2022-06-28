@@ -136,6 +136,7 @@ func (lru *LRUCache) set(key string, val []byte, ttl time.Duration) (err error) 
 	})
 	lru.usedMemory += len(val)
 	lru.bucket[key] = element
+	// check slots
 	if len(lru.bucket) > lru.maxSlots {
 		if tail := lru.linkedQueue.Back(); tail != nil {
 			lv, _ := tail.Value.(*localValue)
@@ -174,7 +175,7 @@ func (lru *LRUCache) delete(key string) {
 
 	// update
 	lv := ele.Value.(*localValue)
-	lru.usedMemory -= lv.value.Len()
+	lru.usedMemory += lv.value.Len()
 	buf := lv.value
 	if buf != nil {
 		buf.Reset()

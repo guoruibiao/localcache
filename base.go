@@ -10,7 +10,9 @@ import (
 
 const (
 	LocalCacheTypeDefault = "default"
-	LocalCacheTypeLRU = "lru"
+	LocalCacheTypeLRU     = "lru"
+	LocalCacheTypeFIFO    = "fifo"
+	LocalCacheTypeLFU     = "lfu"
 )
 
 type Cache interface {
@@ -23,24 +25,22 @@ type Cache interface {
 var Cacher Cache
 
 type Configuration struct {
-	Name string `toml:"name"`
-	MaxSlots int `toml:"max_slots"`
-	MaxMemory int `toml:"max_memory"`
+	Name          string `toml:"name"`
+	MaxSlots      int    `toml:"max_slots"`
+	MaxMemory     int    `toml:"max_memory"`
 	CacheStrategy string `toml:"cache_strategy"`
-	CleanInterval int `toml:"clean_interval"`
+	CleanInterval int    `toml:"clean_interval"`
 }
-
 
 type localValue struct {
 	keyname string // just for lru-cache
-	value *bytes.Buffer
-	ttl time.Time
+	value   *bytes.Buffer
+	ttl     time.Time
 }
 
 func (lv *localValue) isExpired() bool {
 	return !lv.ttl.IsZero() && time.Now().Unix() > lv.ttl.Unix()
 }
-
 
 func Init(configPath string) error {
 	if _, err := os.Stat(configPath); err != nil {
@@ -57,6 +57,8 @@ func Init(configPath string) error {
 	switch config.CacheStrategy {
 	case LocalCacheTypeLRU:
 		Cacher = NewLRUCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
+	case LocalCacheTypeFIFO:
+		Cacher = NewFIFOCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	default:
 		Cacher = NewDefaultLocalCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	}
