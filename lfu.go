@@ -110,12 +110,7 @@ func (lfu *LFUCache) set(key string, val []byte, ttl time.Duration) (err error) 
 			oldLv.frequency = 1
 		}
 		heap.Fix(lfu.minHeap, lfu.minHeap.Index(oldLv))
-		fmt.Println("index=", lfu.minHeap.Index(oldLv))
-
-		//heap.Fix(lfu.minHeap, newLv.frequency-1)
 		lfu.bucket[key] = oldLv
-		//fmt.Printf("old-lv=%#v\n", oldLv)
-		lfu.printBucket()
 		return
 	}
 
@@ -139,9 +134,6 @@ func (lfu *LFUCache) set(key string, val []byte, ttl time.Duration) (err error) 
 	lfu.usedMemory += buf.Len()
 	heap.Push(lfu.minHeap, newLv)
 	lfu.bucket[key] = newLv
-	//fmt.Printf("new-lv=%#v\n", newLv)
-	lfu.printBucket()
-
 	// check slots
 	for {
 		fmt.Println("check slots ..., cur-length=", len(lfu.bucket))
@@ -166,7 +158,7 @@ func (lfu *LFUCache) get(key string) (value []byte) {
 	}
 
 	if lv.isExpired() {
-		//return []byte{}
+		return []byte{}
 	}
 	return lv.value.Bytes()
 }
