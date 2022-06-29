@@ -9,10 +9,10 @@ import (
 
 type Default struct {
 	// statistic info
-	maxSlots int
-	maxMemory int
+	maxSlots   int
+	maxMemory  int
 	usedMemory int
-	usedSlots int
+	usedSlots  int
 
 	// read-write locker
 	mu sync.RWMutex
@@ -22,25 +22,22 @@ type Default struct {
 	bucket map[string]localValue
 }
 
-
-
 var cachePool = sync.Pool{
-	New: func() interface{}{
+	New: func() interface{} {
 		return &bytes.Buffer{}
 	},
 }
 
 func NewDefaultLocalCache(maxSlots, maxMemory, interval int) Cache {
 	cacher := &Default{
-		maxSlots: maxSlots,
-		maxMemory: maxMemory,
-		usedMemory: 0,
-		usedSlots: 0,
-		mu: sync.RWMutex{},
+		maxSlots:      maxSlots,
+		maxMemory:     maxMemory,
+		usedMemory:    0,
+		usedSlots:     0,
+		mu:            sync.RWMutex{},
 		clearInterval: interval,
-		bucket:make(map[string]localValue),
+		bucket:        make(map[string]localValue),
 	}
-
 
 	// background clean goroutine
 	go cacher.backgroundClean()
@@ -48,7 +45,7 @@ func NewDefaultLocalCache(maxSlots, maxMemory, interval int) Cache {
 	return cacher
 }
 
-func (d *Default)statistic() {
+func (d *Default) statistic() {
 	template := fmt.Sprintf(`
 ------------LOCAL_CACHE------------
 ---USED_SLOTS     = %d
@@ -58,7 +55,7 @@ func (d *Default)statistic() {
 ---CLEAN_INTERVAL = %d
 -----------------------------------
 `, d.usedSlots, d.maxSlots, d.usedMemory, d.maxMemory, d.clearInterval)
-    fmt.Println(template)
+	fmt.Println(template)
 }
 
 func (d *Default) backgroundClean() {
@@ -104,7 +101,7 @@ func (d *Default) set(key string, val []byte, ttl time.Duration) (err error) {
 	if oldValue, ok := d.bucket[key]; ok {
 		oldMem = oldValue.value.Len()
 	}
-	if d.usedMemory + len(val) - oldMem > d.maxMemory {
+	if d.usedMemory+len(val)-oldMem > d.maxMemory {
 		return fmt.Errorf("reached max memory")
 	}
 
@@ -115,14 +112,14 @@ func (d *Default) set(key string, val []byte, ttl time.Duration) (err error) {
 	buf.Reset()
 	buf.Write(val)
 	d.bucket[key] = localValue{
-		ttl: time.Now().Add(ttl),
+		ttl:   time.Now().Add(ttl),
 		value: buf,
 	}
 
 	return nil
 }
 
-func (d *Default)get(key string) (value []byte) {
+func (d *Default) get(key string) (value []byte) {
 	d.mu.RLock()
 	v, ok := d.bucket[key]
 	d.mu.RUnlock()
@@ -139,7 +136,7 @@ func (d *Default)get(key string) (value []byte) {
 	return v.value.Bytes()
 }
 
-func (d *Default)delete(key string) {
+func (d *Default) delete(key string) {
 	val, ok := d.bucket[key]
 	if !ok {
 		return

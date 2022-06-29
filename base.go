@@ -33,9 +33,10 @@ type Configuration struct {
 }
 
 type localValue struct {
-	keyname string // just for lru-cache
-	value   *bytes.Buffer
-	ttl     time.Time
+	keyname   string // just for lru-cache
+	frequency int    // just for lfu-cache
+	value     *bytes.Buffer
+	ttl       time.Time
 }
 
 func (lv *localValue) isExpired() bool {
@@ -57,6 +58,8 @@ func Init(configPath string) error {
 	switch config.CacheStrategy {
 	case LocalCacheTypeLRU:
 		Cacher = NewLRUCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
+	case LocalCacheTypeLFU:
+		Cacher = NewLFUCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	case LocalCacheTypeFIFO:
 		Cacher = NewFIFOCache(config.MaxSlots, config.MaxMemory, config.CleanInterval)
 	default:

@@ -11,13 +11,13 @@ func TestLocalCache(t *testing.T) {
 	Cacher = NewDefaultLocalCache(10, 10, 1)
 	Set("name", []byte("tiger"), time.Second)
 	t.Log(GetString("name"))
-	time.Sleep(time.Second*3)
+	time.Sleep(time.Second * 3)
 	t.Log(GetString("name"))
 }
 
 func TestMaxSlots(t *testing.T) {
 	Cacher = NewDefaultLocalCache(10, 10, 1)
-	for idx:=0; idx<11; idx++ {
+	for idx := 0; idx < 11; idx++ {
 		if err := Set(fmt.Sprintf("index_%d", idx), []byte("tiger"), time.Second); err != nil {
 			t.Log(err.Error())
 		}
@@ -25,8 +25,8 @@ func TestMaxSlots(t *testing.T) {
 	if err := Set("index_11", []byte("tiger"), time.Second*3); err != nil {
 		t.Log(err.Error())
 	}
-	time.Sleep(time.Second*2)
-	for idx:=0; idx < 11; idx++ {
+	time.Sleep(time.Second * 2)
+	for idx := 0; idx < 11; idx++ {
 		t.Log(GetString(fmt.Sprintf("index_%d", idx)))
 	}
 	t.Log(GetString("index_11"))
@@ -34,13 +34,13 @@ func TestMaxSlots(t *testing.T) {
 
 func TestMaxMemory(t *testing.T) {
 	Cacher = NewDefaultLocalCache(10, 10, 1)
-	for idx:=0; idx<11; idx++ {
+	for idx := 0; idx < 11; idx++ {
 		if err := Set(fmt.Sprintf("index_%d", idx), []byte("tiger"), time.Second); err != nil {
 			t.Log(err.Error())
 		}
 	}
-	time.Sleep(time.Second*2)
-	for idx:=0; idx < 11; idx++ {
+	time.Sleep(time.Second * 2)
+	for idx := 0; idx < 11; idx++ {
 		t.Log(GetString(fmt.Sprintf("index_%d", idx)))
 	}
 	t.Log(GetString("index_11"))
